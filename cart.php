@@ -40,19 +40,38 @@ if(isset($_SESSION['cart'])){
 			);
     $_SESSION['cart'][$product_id]=$product_array;
 }
+calculateTotal();
 }elseif (isset($_POST['remove_btn'])){
 	$product_id = $_POST['product_id'];
 	unset($_SESSION['cart'][$product_id]);
+	calculateTotal();
 }
-elseif (isset($_POST['edit_quantity_btm'])) {
+elseif (isset($_POST['edit_quantity_btn'])) {
 	$product_id = $_POST['product_id'];
 	$product_quantity = $_POST['product_quantity'];
 	$product = $_SESSION['cart'][$product_id];//['cheese'=>'price']
 
 	$product['product_quantity']= $product_quantity;// update product in session to new quantity
 	$_SESSION['cart'][$product_id]=$product;
+	calculateTotal();
+}
+function calculateTotal(){
+	$total_price=0;
+	$total_quantity=0;
+
+	foreach($_SESSION['cart'] as $id => $product){
+		$product=$_SESSION['cart'][$id];
+		$product_price=$product['product_price'];
+		$product_quantity=$product['product_quantity'];
+		$total_price=$total_price + ($product_price * $product_quantity);
+		$total_quantity=$total_quantity + $product_quantity;
+	}
+	$_SESSION['total']=$total_price;
+	$_SESSION['quantity']=$total_quantity;
 }
 ?>
+
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -102,6 +121,7 @@ elseif (isset($_POST['edit_quantity_btm'])) {
   <th scope="col">Product</th>
   <th scope="col" width="120">Quantity</th>
   <th scope="col" width="120">Price</th>
+  <th scope="col" width="120">Total</th>
   <th scope="col" class="text-right" width="200"> </th>
 </tr>
 </thead>
@@ -141,9 +161,13 @@ elseif (isset($_POST['edit_quantity_btm'])) {
 			<var class="price">$<?php echo $value['product_price'];?></var> 
       <br>
 			<!-- <small class="text-muted"> $315.20 each </small>  -->
-		</div> <!-- price-wrap .// -->
+		</div>
+		 <!-- price-wrap .// -->
+		 <td>TOTAL: <?php echo $value['product_price'] * $value['product_quantity'];?></td>
 	</td>
-	<td class="text-right"> 
+
+
+	<td class="text-right">
 
 
 	<form action="cart.php" method="post">
@@ -167,7 +191,9 @@ elseif (isset($_POST['edit_quantity_btm'])) {
 		<div class="card-body">
 			<dl class="dlist-align">
 			  <dt>Total price:</dt>
-			  <dd class="text-right">$69.97</dd>
+			  <?php if (isset($_SESSION['cart'])) { ?>
+			<dd class="text-right"><?php echo $_SESSION['total'];?></dd>
+			<?php }?>
 			</dl>
 			<dl class="dlist-align">
 			  <dt>Tax:</dt>
@@ -181,7 +207,7 @@ elseif (isset($_POST['edit_quantity_btm'])) {
 			<p class="text-center mb-3">
 				<img src="./images/bg_3.png" height="26">
 			</p>
-			<a href="./place-order.html" class="btn btn-primary btn-block"> Checkout </a>
+			<a href="#" class="btn btn-primary btn-block"> Checkout </a>
 			<a href="./product.php" class="btn btn-light btn-block">Continue Shopping</a>
 		</div> <!-- card-body.// -->
 		</div> <!-- card.// -->
